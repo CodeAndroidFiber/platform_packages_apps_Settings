@@ -87,7 +87,7 @@ public class DisplaySettings extends SettingsPreferenceFragment implements
     private final Configuration mCurConfig = new Configuration();
 
     private ListPreference mScreenTimeoutPreference;
-    private ListPreference mNightModePreference;
+    private SwitchPreference mNightModePreference;
     private Preference mScreenSaverPreference;
     private SwitchPreference mLiftToWakePreference;
     private SwitchPreference mDozePreference;
@@ -209,12 +209,15 @@ public class DisplaySettings extends SettingsPreferenceFragment implements
             removePreference(KEY_AUTO_ROTATE);
         }
 
-        mNightModePreference = (ListPreference) findPreference(KEY_NIGHT_MODE);
+        mNightModePreference = (SwitchPreference) findPreference(KEY_NIGHT_MODE);
         if (mNightModePreference != null) {
-            final UiModeManager uiManager = (UiModeManager) getSystemService(
-                    Context.UI_MODE_SERVICE);
+            final UiModeManager uiManager = (UiModeManager) getSystemService(Context.UI_MODE_SERVICE);
             final int currentNightMode = uiManager.getNightMode();
-            mNightModePreference.setValue(String.valueOf(currentNightMode));
+	    if(currentNightMode == 2) {
+            	mNightModePreference.setChecked(true);
+	    } else {
+		mNightModePreference.setChecked(false);
+	    }
             mNightModePreference.setOnPreferenceChangeListener(this);
         }
     }
@@ -483,11 +486,11 @@ public class DisplaySettings extends SettingsPreferenceFragment implements
                     value ? 0 : 1 /* Backwards because setting is for disabling */);
         }
         if (preference == mNightModePreference) {
-            try {
-                final int value = Integer.parseInt((String) objValue);
+	    try {
+                final boolean value = (Boolean) objValue;
                 final UiModeManager uiManager = (UiModeManager) getSystemService(
                         Context.UI_MODE_SERVICE);
-                uiManager.setNightMode(value);
+                uiManager.setNightMode(value ? 2 : 1);
             } catch (NumberFormatException e) {
                 Log.e(TAG, "could not persist night mode setting", e);
             }
